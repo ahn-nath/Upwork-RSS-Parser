@@ -1,12 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 import lxml 
-import os
 import time
 import ssl
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import email.message
 
 
