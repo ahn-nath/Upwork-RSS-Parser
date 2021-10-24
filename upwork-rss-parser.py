@@ -7,22 +7,22 @@ import smtplib
 import email.message
 
 
-#Keywords to search for (EDIT ME)
+#Keywords to search for (EDIT THIS, SEE README)
 KEYWORDS = ["website", "wordpress", "react", "javascript", "landing", "elementor"]
 
-#Minimum client budget to search for in dollars (EDIT ME)
+#Minimum client budget to search for in dollars (EDIT THIS, SEE README)
 MINIMUM_BUDGET = 250
 
-#RSS URL for Upwork (EDIT ME)
+#RSS URL for Upwork (EDIT THIS, SEE README)
 RSS_URL = "https://www.upwork.com"
 
-#Email address to send results to (EDIT ME)
+#Email address to send results to (EDIT THIS, SEE README)
 TO_EMAIL = "email@email.com"
 
-#Gmail address to send emails with (EDIT ME)
+#Gmail address to send emails with (EDIT THIS, SEE README)
 FROM_EMAIL = "email@gmail.com" 
 
-#Time to sleep between RSS HTTP GET requests. (EDIT ME)
+#Time to sleep between RSS HTTP GET requests. (EDIT THIS, SEE README)
 SLEEP_TIME = 250 
 
 #Script will prompt you for your Gmail password
