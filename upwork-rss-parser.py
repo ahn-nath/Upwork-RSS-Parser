@@ -17,13 +17,13 @@ MINIMUM_FIXED_PRICE = 250
 MINIMUM_HOURLY_RATE = 10
 
 # RSS URL for Upwork (EDIT THIS, SEE README)
-RSS_URL = "https://www.upwork.com/ab/feed/jobs/rss?category2_uid=531770282580668418&sort=recency&paging=0%3B10&api_params=1&q=&securityToken=be7695356ca18fd6ff8e879cbcbb27c9affa21fe3943861361f2c951400dbcecf97f8eeaaac7773024eca5f73194cb8d626b32818641d2eaa457d068c1c1e613&userUid=1216002150314332160&orgUid=1216002150331109377"
+RSS_URL = "https://www.upwork.com"
 
 # Email address to send results to (EDIT THIS, SEE README)
-TO_EMAIL = "nathaly@karpidesign.com"
+TO_EMAIL = "email@test.com"
 
 # Gmail address to send emails with (EDIT THIS, SEE README)
-FROM_EMAIL = "nathaly.toledo.dev@gmail.com"
+FROM_EMAIL = "email@test.com"
 
 # Time to sleep between RSS HTTP GET requests. (EDIT THIS, SEE README)
 SLEEP_TIME = 250
