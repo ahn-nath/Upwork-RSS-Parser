@@ -6,8 +6,22 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
+'''
+TODOS:
+
+#1 comment/document methods
+#2 skills to avoid
+
+
+'''
+
+
+
 # Keywords to search for (EDIT THIS, SEE README)
-KEYWORDS = ["website", "wordpress", "react", "javascript", "landing", "elementor"]
+KEYWORDS = ["cms development", "wordpress", "webflow", "wix", "shopify", "squarespace", "weebly"]
+
+# Keywords to avoid for
+KEYWORDS_TO_AVOID = []
 
 # Minimum client budget to search for in dollars (EDIT THIS, SEE README)
 MINIMUM_BUDGET = 0
@@ -17,13 +31,13 @@ MINIMUM_FIXED_PRICE = 250
 MINIMUM_HOURLY_RATE = 10
 
 # RSS URL for Upwork (EDIT THIS, SEE README)
-RSS_URL = "https://www.upwork.com"
+RSS_URL = "https://www.upwork.com/ab/feed/jobs/rss?category2_uid=531770282580668418&sort=recency&paging=0%3B10&api_params=1&q=&securityToken=be7695356ca18fd6ff8e879cbcbb27c9affa21fe3943861361f2c951400dbcecf97f8eeaaac7773024eca5f73194cb8d626b32818641d2eaa457d068c1c1e613&userUid=1216002150314332160&orgUid=1216002150331109377"
 
 # Email address to send results to (EDIT THIS, SEE README)
-TO_EMAIL = "email@test.com"
+TO_EMAIL = "nathaly@karpidesign.com"
 
 # Gmail address to send emails with (EDIT THIS, SEE README)
-FROM_EMAIL = "email@test.com"
+FROM_EMAIL = "nathaly.toledo.dev@gmail.com"
 
 # Time to sleep between RSS HTTP GET requests. (EDIT THIS, SEE README)
 SLEEP_TIME = 250
@@ -123,7 +137,8 @@ def request_upwork_rss():
             if min_budget[0]:
                 keyword_results = title_or_description_contains_keywords(str(res.find("title").text),
                                                                          str(res.find("description").text))
-                if keyword_results:
+
+                if keyword_results: # or skills
                     if not (str(res.find("title").text) + str(res.find("pubDate").text)) in previous_results:
                         previous_results.append(str(res.find("title").text) + str(res.find("pubDate").text))
                         email_data = [" Title: " + str(res.find("title").text),
