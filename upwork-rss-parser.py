@@ -1,56 +1,60 @@
+import email.message
+import smtplib
+import ssl
+import time
+
 import requests
 from bs4 import BeautifulSoup
-import lxml 
-import time
-import ssl
-import smtplib
-import email.message
 
-
-#Keywords to search for (EDIT THIS, SEE README)
+# Keywords to search for (EDIT THIS, SEE README)
 KEYWORDS = ["website", "wordpress", "react", "javascript", "landing", "elementor"]
 
-#Minimum client budget to search for in dollars (EDIT THIS, SEE README)
-MINIMUM_BUDGET = 250
+# Minimum client budget to search for in dollars (EDIT THIS, SEE README)
+MINIMUM_BUDGET = 0
 
-#RSS URL for Upwork (EDIT THIS, SEE README)
-RSS_URL = "https://www.upwork.com"
+MINIMUM_FIXED_PRICE = 250
 
-#Email address to send results to (EDIT THIS, SEE README)
-TO_EMAIL = "email@email.com"
+MINIMUM_HOURLY_RATE = 10
 
-#Gmail address to send emails with (EDIT THIS, SEE README)
-FROM_EMAIL = "email@gmail.com" 
+# RSS URL for Upwork (EDIT THIS, SEE README)
+RSS_URL = "https://www.upwork.com/ab/feed/jobs/rss?category2_uid=531770282580668418&sort=recency&paging=0%3B10&api_params=1&q=&securityToken=be7695356ca18fd6ff8e879cbcbb27c9affa21fe3943861361f2c951400dbcecf97f8eeaaac7773024eca5f73194cb8d626b32818641d2eaa457d068c1c1e613&userUid=1216002150314332160&orgUid=1216002150331109377"
 
-#Time to sleep between RSS HTTP GET requests. (EDIT THIS, SEE README)
-SLEEP_TIME = 250 
+# Email address to send results to (EDIT THIS, SEE README)
+TO_EMAIL = "nathaly@karpidesign.com"
 
-#Script will prompt you for your Gmail password
+# Gmail address to send emails with (EDIT THIS, SEE README)
+FROM_EMAIL = "nathaly.toledo.dev@gmail.com"
+
+# Time to sleep between RSS HTTP GET requests. (EDIT THIS, SEE README)
+SLEEP_TIME = 250
+
+# Script will prompt you for your Gmail password
 FROM_EMAIL_PASSWORD = input("Please input your Gmail password:")
 
-#Array to keep track of previously emailed results
+# Array to keep track of previously emailed results
 previous_results = []
-
 
 
 def send_email(sender, password, to, message):
     try:
         context = ssl.create_default_context()
-        with smtplib.SMTP("smtp.gmail.com", "587") as server:
-            server.ehlo() 
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
             server.starttls(context=context)
-            server.ehlo()  
+            server.ehlo()
             server.login(sender, password)
             server.sendmail(sender, to, message)
+
     except Exception as e:
         print("[!] Error sending email!")
         print(str(e))
 
-
-def email_results(emailArray):
+def email_results(email_array):
     global TO_EMAIL
     global FROM_EMAIL
     global FROM_EMAIL_PASSWORD
+
     msg = email.message.Message()
     msg['From'] = FROM_EMAIL
     msg['To'] = TO_EMAIL
@@ -58,24 +62,36 @@ def email_results(emailArray):
     msg.add_header('Content-Type', 'text')
     msg.set_payload("This is your message.")
     message_payload = ""
-    for result in emailArray:
+    for result in email_array:
         message_payload = message_payload + "\r\n".join(result) + "\r\n"
     msg.set_payload(message_payload)
     print(msg)
     send_email(
-        sender = FROM_EMAIL,
-        password = FROM_EMAIL_PASSWORD,
+        sender=FROM_EMAIL,
+        password=FROM_EMAIL_PASSWORD,
         to=TO_EMAIL,
         message=msg.as_string())
 
 
-def is_above_minimum_budget(budgetString):
+def is_above_minimum_budget(budget_string):
     global MINIMUM_BUDGET
-    budgetString = budgetString[budgetString.find("</b>: $")+6::]
-    budgetString = budgetString[0:budgetString.find("<br")].strip()
-    budgetString = budgetString.replace(',', '')
-    budgetString = budgetString.replace('$', '')
-    return [int(budgetString) > MINIMUM_BUDGET,budgetString]
+
+    # check if there's any budget/hourly rate available
+    is_there_any_budget = (budget_string.find("</b>: $") > 0) #
+
+    # extract fixed price/hourly rate from string
+    budget_string = budget_string[budget_string.find("</b>: $") + 6::]
+    budget_string = budget_string[0:budget_string.find("<br")].strip()
+    budget_string = budget_string.replace(',', '')
+    budget_string = budget_string.replace('$', '').split("-")
+
+    # if there is a budget, convert value from string representation of a number to integer, otherwise, set to 0
+    final_value = int(float(budget_string[len(budget_string)-1])) if is_there_any_budget else 0
+    # set MINIMUM_BUDGET to MINIMUM HOURLY RATE if it is an hourly contract, otherwise set to MINIMUM_FIXED_PRICE
+    MINIMUM_BUDGET = MINIMUM_HOURLY_RATE if (len(budget_string) > 1) else MINIMUM_FIXED_PRICE
+
+    # check against min budget and min hourly rate depending on each case
+    return [final_value > MINIMUM_BUDGET, budget_string[0]]
 
 
 def title_or_description_contains_keywords(title, description):
@@ -91,7 +107,7 @@ def request_upwork_rss():
     global KEYWORDS
     global previous_results
     global RSS_URL
-    emailOutput = []
+    email_output = []
     try:
         x = requests.get(RSS_URL)
     except Exception as e:
@@ -101,26 +117,24 @@ def request_upwork_rss():
     if str(x.status_code) == "200":
         soup = BeautifulSoup(x.content, features='xml')
         result = soup.find_all("item")
+
         for res in result:
-            minBudget = is_above_minimum_budget(str(res.find("description").text))
-            if minBudget[0]:
-                keywordResults = title_or_description_contains_keywords(str(res.find("title").text), str(res.find("description").text))
-                if keywordResults:
+            min_budget = is_above_minimum_budget(str(res.find("description").text))
+            if min_budget[0]:
+                keyword_results = title_or_description_contains_keywords(str(res.find("title").text),
+                                                                         str(res.find("description").text))
+                if keyword_results:
                     if not (str(res.find("title").text) + str(res.find("pubDate").text)) in previous_results:
                         previous_results.append(str(res.find("title").text) + str(res.find("pubDate").text))
-                        emailData = []
-                        emailData.append(" Title: " + str(res.find("title").text))
-                        emailData.append(" Keywords Detected: " + ",".join(str(x) for x in keywordResults))
-                        emailData.append(" Client budget: " + minBudget[1])
-                        emailData.append(" URI: " + str(res.find("link").text))
-                        emailData.append(" Date published: " + str(res.find("pubDate").text))
-                        emailData.append("\r\n")
-                        emailOutput.append(emailData)
-        if emailOutput:
-            email_results(emailOutput)
+                        email_data = [" Title: " + str(res.find("title").text),
+                                      " Keywords Detected: " + ",".join(str(x) for x in keyword_results),
+                                      " Client budget: " + min_budget[1], " URI: " + str(res.find("link").text),
+                                      " Date published: " + str(res.find("pubDate").text), "\r\n"]
+                        email_output.append(email_data)
+        if email_output:
+            email_results(email_output)
 
 
 while True:
     request_upwork_rss()
     time.sleep(SLEEP_TIME)
-
