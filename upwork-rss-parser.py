@@ -10,25 +10,31 @@ from bs4 import BeautifulSoup
 TODOS:
 
 #1 comment/document methods
-#2 skills to avoid
-
 
 '''
-
-
 
 # Keywords to search for (EDIT THIS, SEE README)
 KEYWORDS = ["cms development", "wordpress", "webflow", "wix", "shopify", "squarespace", "weebly"]
 
-# Keywords to avoid for
-KEYWORDS_TO_AVOID = []
+# Keywords to avoid (EDIT THIS, SEE README)
+KEYWORDS_TO_AVOID = ['javascript, php, c#, c, c++, java, scala, coldfusion, ruby, perl, python, javascript, erlang, '
+                     'sql', 'golang', 'excel vba', 'kotlin', 'vb.net', 'swift']
 
-# Minimum client budget to search for in dollars (EDIT THIS, SEE README)
+TOOLS_LANGUAGES = ['asp.net', 'node.js', 'ruby on rails', 'django', 'laravel', 'cakephp', 'jquery', 'angular',
+                   'angular 2', 'aurelia', 'backbone.js', 'ember', 'knockout.js', 'mercury.js', 'meteor.js',
+                   'polymer', 'react', 'underscore', 'vue', 'react']
+
+# The minimum budget variable for hourly contract and fixed prices
 MINIMUM_BUDGET = 0
 
+# Minimum client budget to search for in dollars (EDIT THIS, SEE README)
 MINIMUM_FIXED_PRICE = 250
 
+# Minimum client hourly rate to search for in dollars (EDIT THIS, SEE README)
 MINIMUM_HOURLY_RATE = 10
+
+# Desired project length/range  [-1: 'None', 0: 'Less than a month', 1: '1 to 3 months', 2: '3 to 6 months', 3: 'More than 6 months'](EDIT THIS, SEE README)
+PROJECT_LENGTH = 1
 
 # RSS URL for Upwork (EDIT THIS, SEE README)
 RSS_URL = "https://www.upwork.com/ab/feed/jobs/rss?category2_uid=531770282580668418&sort=recency&paging=0%3B10&api_params=1&q=&securityToken=be7695356ca18fd6ff8e879cbcbb27c9affa21fe3943861361f2c951400dbcecf97f8eeaaac7773024eca5f73194cb8d626b32818641d2eaa457d068c1c1e613&userUid=1216002150314332160&orgUid=1216002150331109377"
@@ -64,6 +70,7 @@ def send_email(sender, password, to, message):
         print("[!] Error sending email!")
         print(str(e))
 
+
 def email_results(email_array):
     global TO_EMAIL
     global FROM_EMAIL
@@ -91,7 +98,7 @@ def is_above_minimum_budget(budget_string):
     global MINIMUM_BUDGET
 
     # check if there's any budget/hourly rate available
-    is_there_any_budget = (budget_string.find("</b>: $") > 0) #
+    is_there_any_budget = (budget_string.find("</b>: $") > 0)  #
 
     # extract fixed price/hourly rate from string
     budget_string = budget_string[budget_string.find("</b>: $") + 6::]
@@ -100,7 +107,7 @@ def is_above_minimum_budget(budget_string):
     budget_string = budget_string.replace('$', '').split("-")
 
     # if there is a budget, convert value from string representation of a number to integer, otherwise, set to 0
-    final_value = int(float(budget_string[len(budget_string)-1])) if is_there_any_budget else 0
+    final_value = int(float(budget_string[len(budget_string) - 1])) if is_there_any_budget else 0
     # set MINIMUM_BUDGET to MINIMUM HOURLY RATE if it is an hourly contract, otherwise set to MINIMUM_FIXED_PRICE
     MINIMUM_BUDGET = MINIMUM_HOURLY_RATE if (len(budget_string) > 1) else MINIMUM_FIXED_PRICE
 
@@ -115,6 +122,24 @@ def title_or_description_contains_keywords(title, description):
         if keyword in title.lower() or keyword in description.lower():
             results.append(keyword)
     return results
+
+
+def keywords_and_tools_not_present_title_or_description(title, description):
+    global KEYWORDS_TO_AVOID
+    global TOOLS_LANGUAGES_TO_AVOID
+
+    words_to_avoid = KEYWORDS_TO_AVOID.extend(TOOLS_LANGUAGES_TO_AVOID)
+    result = False
+
+    for keyword in words_to_avoid:
+        if keyword not in title.lower() or keyword in description.lower():
+            result = True
+    return result
+
+
+def is_within_project_length(url):
+    print("url to parse: ", url)
+    pass
 
 
 def request_upwork_rss():
@@ -137,15 +162,18 @@ def request_upwork_rss():
             if min_budget[0]:
                 keyword_results = title_or_description_contains_keywords(str(res.find("title").text),
                                                                          str(res.find("description").text))
-
-                if keyword_results: # or skills
-                    if not (str(res.find("title").text) + str(res.find("pubDate").text)) in previous_results:
-                        previous_results.append(str(res.find("title").text) + str(res.find("pubDate").text))
-                        email_data = [" Title: " + str(res.find("title").text),
-                                      " Keywords Detected: " + ",".join(str(x) for x in keyword_results),
-                                      " Client budget: " + min_budget[1], " URI: " + str(res.find("link").text),
-                                      " Date published: " + str(res.find("pubDate").text), "\r\n"]
-                        email_output.append(email_data)
+                if keyword_results:  # or skills
+                    are_keywords_in_post = keywords_and_tools_not_present_title_or_description(
+                        str(res.find("title").text), str(res.find("description").text))
+                    if are_keywords_in_post:
+                        if is_within_project_length(str(res.find("link").text)):
+                            if not (str(res.find("title").text) + str(res.find("pubDate").text)) in previous_results:
+                                previous_results.append(str(res.find("title").text) + str(res.find("pubDate").text))
+                                email_data = [" Title: " + str(res.find("title").text),
+                                              " Keywords Detected: " + ",".join(str(x) for x in keyword_results),
+                                              " Client budget: " + min_budget[1], " URI: " + str(res.find("link").text),
+                                              " Date published: " + str(res.find("pubDate").text), "\r\n"]
+                                email_output.append(email_data)
         if email_output:
             email_results(email_output)
 
