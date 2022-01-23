@@ -20,9 +20,9 @@ KEYWORDS = ["cms development", "wordpress", "webflow", "wix", "shopify", "square
 KEYWORDS_TO_AVOID = ['javascript, php, c#, c, c++, java, scala, coldfusion, ruby, perl, python, javascript, erlang, '
                      'sql', 'golang', 'excel vba', 'kotlin', 'vb.net', 'swift']
 
-TOOLS_LANGUAGES = ['asp.net', 'node.js', 'ruby on rails', 'django', 'laravel', 'cakephp', 'jquery', 'angular',
-                   'angular 2', 'aurelia', 'backbone.js', 'ember', 'knockout.js', 'mercury.js', 'meteor.js',
-                   'polymer', 'react', 'underscore', 'vue', 'react']
+TOOLS_LANGUAGES_TO_AVOID = ['asp.net', 'node.js', 'ruby on rails', 'django', 'laravel', 'cakephp', 'jquery', 'angular',
+                            'angular 2', 'aurelia', 'backbone.js', 'ember', 'knockout.js', 'mercury.js', 'meteor.js',
+                            'polymer', 'react', 'underscore', 'vue', 'react']
 
 # The minimum budget variable for hourly contract and fixed prices
 MINIMUM_BUDGET = 0
@@ -37,10 +37,10 @@ MINIMUM_HOURLY_RATE = 10
 PROJECT_LENGTH = 1
 
 # RSS URL for Upwork (EDIT THIS, SEE README)
-RSS_URL = "https://www.upwork.com/ab/feed/jobs/rss?category2_uid=531770282580668418&sort=recency&paging=0%3B10&api_params=1&q=&securityToken=be7695356ca18fd6ff8e879cbcbb27c9affa21fe3943861361f2c951400dbcecf97f8eeaaac7773024eca5f73194cb8d626b32818641d2eaa457d068c1c1e613&userUid=1216002150314332160&orgUid=1216002150331109377"
+RSS_URL = "https://www.upwork.com/ab/feed/jobs/rss?budget=250-&category2_uid=531770282580668418&duration_v3=month&hourly_rate=10-&sort=recency&job_type=hourly%2Cfixed&paging=0%3B10&api_params=1&q=&securityToken=be7695356ca18fd6ff8e879cbcbb27c9affa21fe3943861361f2c951400dbcecf97f8eeaaac7773024eca5f73194cb8d626b32818641d2eaa457d068c1c1e613&userUid=1216002150314332160&orgUid=1216002150331109377"
 
 # Email address to send results to (EDIT THIS, SEE README)
-TO_EMAIL = "nathaly@karpidesign.com"
+TO_EMAIL = ["nathaly@karpidesign.com", "pavel@karpidesign.com"]
 
 # Gmail address to send emails with (EDIT THIS, SEE README)
 FROM_EMAIL = "nathaly.toledo.dev@gmail.com"
@@ -78,7 +78,7 @@ def email_results(email_array):
 
     msg = email.message.Message()
     msg['From'] = FROM_EMAIL
-    msg['To'] = TO_EMAIL
+    msg['To'] = str(TO_EMAIL)
     msg['Subject'] = "New Upwork Projects"
     msg.add_header('Content-Type', 'text')
     msg.set_payload("This is your message.")
@@ -110,9 +110,11 @@ def is_above_minimum_budget(budget_string):
     final_value = int(float(budget_string[len(budget_string) - 1])) if is_there_any_budget else 0
     # set MINIMUM_BUDGET to MINIMUM HOURLY RATE if it is an hourly contract, otherwise set to MINIMUM_FIXED_PRICE
     MINIMUM_BUDGET = MINIMUM_HOURLY_RATE if (len(budget_string) > 1) else MINIMUM_FIXED_PRICE
+    string_concatenate = "${fvalue} {sign}".format(fvalue=budget_string[0],
+                                                   sign='/h' if (len(budget_string) > 1) else '')
 
     # check against min budget and min hourly rate depending on each case
-    return [final_value > MINIMUM_BUDGET, budget_string[0]]
+    return [final_value > MINIMUM_BUDGET, string_concatenate]
 
 
 def title_or_description_contains_keywords(title, description):
@@ -128,7 +130,8 @@ def keywords_and_tools_not_present_title_or_description(title, description):
     global KEYWORDS_TO_AVOID
     global TOOLS_LANGUAGES_TO_AVOID
 
-    words_to_avoid = KEYWORDS_TO_AVOID.extend(TOOLS_LANGUAGES_TO_AVOID)
+    words_to_avoid = list(KEYWORDS_TO_AVOID)
+    words_to_avoid.extend(TOOLS_LANGUAGES_TO_AVOID)
     result = False
 
     for keyword in words_to_avoid:
@@ -143,6 +146,8 @@ def is_within_project_length(url):
 
 
 def request_upwork_rss():
+    print('running a new request')
+
     global KEYWORDS
     global previous_results
     global RSS_URL
@@ -166,14 +171,14 @@ def request_upwork_rss():
                     are_keywords_in_post = keywords_and_tools_not_present_title_or_description(
                         str(res.find("title").text), str(res.find("description").text))
                     if are_keywords_in_post:
-                        if is_within_project_length(str(res.find("link").text)):
-                            if not (str(res.find("title").text) + str(res.find("pubDate").text)) in previous_results:
-                                previous_results.append(str(res.find("title").text) + str(res.find("pubDate").text))
-                                email_data = [" Title: " + str(res.find("title").text),
-                                              " Keywords Detected: " + ",".join(str(x) for x in keyword_results),
-                                              " Client budget: " + min_budget[1], " URI: " + str(res.find("link").text),
-                                              " Date published: " + str(res.find("pubDate").text), "\r\n"]
-                                email_output.append(email_data)
+                        # is_within_project_length(str(res.find("link").text)) # testing only
+                        if not (str(res.find("title").text) + str(res.find("pubDate").text)) in previous_results:
+                            previous_results.append(str(res.find("title").text) + str(res.find("pubDate").text))
+                            email_data = [" Title: " + str(res.find("title").text),
+                                          " Keywords/Skills Detected: " + ",".join(str(x) for x in keyword_results),
+                                          " Client budget: " + min_budget[1], " URI: " + str(res.find("link").text),
+                                          " Date published: " + str(res.find("pubDate").text), "\r\n"]
+                            email_output.append(email_data)
         if email_output:
             email_results(email_output)
 
