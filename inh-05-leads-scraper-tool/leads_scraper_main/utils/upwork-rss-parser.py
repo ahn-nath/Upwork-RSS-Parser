@@ -183,6 +183,7 @@ def request_upwork_rss():
             email_results(email_output)
 
 
-while True:
-    request_upwork_rss()
-    time.sleep(SLEEP_TIME)
+def main():
+    while True:
+        request_upwork_rss()
+        time.sleep(SLEEP_TIME)
