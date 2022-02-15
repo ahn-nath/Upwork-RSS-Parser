@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from leads_scraper_main.utils.parser import main_scrape_results
 
 
 class LeadsScraperMainConfig(AppConfig):
@@ -8,6 +9,5 @@ class LeadsScraperMainConfig(AppConfig):
 
     # startup code here
     def ready(self):
-        #pass
-        print('## TESTING PROJECT ##')
-
+        print('## STARTING PROJECT ##')
+        main_scrape_results()
