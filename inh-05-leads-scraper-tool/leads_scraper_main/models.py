@@ -1,7 +1,9 @@
 from django.db import models
-
+from django import forms
 
 # Create your models here.
+
+
 
 class Teacher(models.Model):
     name = models.CharField(max_length=80)
@@ -13,4 +15,3 @@ class CustomRequirements(models.Model):
     hourly_rate = models.IntegerField()
     budget = models.IntegerField()
     to_email = models.EmailField()
-

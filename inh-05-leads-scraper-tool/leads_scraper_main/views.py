@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
 # base route
+from leads_scraper_main.forms import CustomRequirementsForm
 from leads_scraper_main.models import CustomRequirements
 
 
@@ -24,23 +25,32 @@ class SignUp(CreateView):
 def custom(request):
     if request.method == 'POST':
         keywords = request.POST['keywords']
-        hourly = request.POST['hourly']
+        hourly = request.POST['hourly_rate']
         budget = request.POST['budget']
-        email = request.POST['email']
+        email = request.POST['to_email']
+
+        request_val = {
+            "keywords": "",
+            "hourly_rate": 5,
+            "budget": 196,
+            "to_email": "nathaly12toledo@gmail.com"
+        }
 
         # debug
         print(keywords + email + hourly + budget)
+        print(request.POST)
 
         # update database
         id = 1
         # custom_requirements = CustomRequirements.objects.update(request.POST, instance = requirements)
         requirements = CustomRequirements.objects.get(id=id)
-        custom_requirements = CustomRequirements.objects.update(hourly_rate=hourly, budget=budget,
-                                                                to_email=email, instance=requirements)
-        custom_requirements.save()
-        print('requirements created')
+        custom_requirements = CustomRequirementsForm(request.POST, instance=requirements)
+
+        if custom_requirements.is_valid():
+            custom_requirements.save()
+            print('requirements created')
 
         # run main script again to update status
-        return redirect('leads_scraper_main/home.html')
+        return redirect('/home')
     #
     return render(request, 'leads_scraper_main/custom.html')
