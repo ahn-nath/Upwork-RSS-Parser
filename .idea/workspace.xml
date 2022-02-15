@@ -71,7 +71,13 @@
       <workItem from="1642436996235" duration="3763000" />
       <workItem from="1642445357750" duration="5567000" />
       <workItem from="1642472676223" duration="26000" />
-      <workItem from="1642870645719" duration="13076000" />
+      <workItem from="1642870645719" duration="13358000" />
+      <workItem from="1642975676725" duration="8000" />
+      <workItem from="1643059687422" duration="67000" />
+      <workItem from="1643061480097" duration="163000" />
+      <workItem from="1643914014831" duration="1143000" />
+      <workItem from="1643989716508" duration="594000" />
+      <workItem from="1644863259630" duration="60000" />
     </task>
     <servers />
   </component>
@@ -79,6 +85,6 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Upwork_RSS_Parser$upwork_rss_parser.coverage" NAME="upwork-rss-parser Coverage Results" MODIFIED="1642898778926" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Upwork_RSS_Parser$upwork_rss_parser.coverage" NAME="upwork-rss-parser Coverage Results" MODIFIED="1643914087446" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
