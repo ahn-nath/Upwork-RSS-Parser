@@ -185,5 +185,11 @@ def request_upwork_rss():
 
 def main_scrape_results():
     while True:
+        # TODO: retrieve from database and set values in while loop
+        # TODO: fix issue with string subject
+        # TODO: one email per post
+        # TODO: change templates
+        # TODO: Publish to Heroku with database connection
+
         request_upwork_rss()
         time.sleep(SLEEP_TIME)
